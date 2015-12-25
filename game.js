@@ -34,7 +34,7 @@ angular.module('myApp')
                         return board[row][column].down === true;
                 };
 
-                $scope.isTakenPlayerOne=function(row,column){
+              /*  $scope.isTakenPlayerOne=function(row,column){
                         return board[row][column].status === "captured_one" ||
                             board[row][column].status === "occupied_one";
                 };
@@ -42,19 +42,21 @@ angular.module('myApp')
                 $scope.isTakenPlayerTwo=function(row,column){
                         return board[row][column].status === "captured_two" ||
                             board[row][column].status === "occupied_two";
-                };
+                };*/
+                $scope.isTakenbyPlayer=function(row,column,playerid){
+                        return board[row][column].ownedby==playerid
+                }
 
                 $scope.shouldShowImage=function(row,column){
-                        return board[row][column].status === "occupied_one" || board[row][column].status === "occupied_two";
+                        return board[row][column].status === "occupied"
                 };
 
                 $scope.imageLink=function(row,column){
-                        if(board[row][column].status === "occupied_one"){
-                                return "bertleft.png";
-                        }else if(board[row][column].status === "occupied_two"){
-                                return "coily.png";
-                        }
 
+                        if(board[row][column].status === "occupied"){
+                              var name =   "player"+board[row][column].ownedby +".png";
+                              return name;
+                        }
                 };
 
                 function update (row,column,directions){
@@ -82,7 +84,6 @@ angular.module('myApp')
                         console.log(Logic.getBoard());
 
                         if (Logic.noMorePieces()){
-                             //   $interval(Logic.advanceTime,1000);
                                  intervalpromise = $interval(playtoend,1000);
                         }
                 };
@@ -129,6 +130,7 @@ angular.module('myApp')
                 };
 
                 function validateProgram(value){
+                        if(value==='') value = 'UDLR';          
                         value = value.toUpperCase();
                         var chars = value.split('');
 
@@ -166,8 +168,8 @@ angular.module('myApp')
                         return returnVals;
                 }
 
-                function newGame (numberOfPlayers, player1Name, player2Name){
-                        Logic.newGame(numberOfPlayers, player1Name, player2Name);
+                function newGame (playersDict){
+                        Logic.newGame(playersDict);
                         board = Logic.getBoard();
 		         winningScore=0;
                            
@@ -177,6 +179,10 @@ angular.module('myApp')
                     var winner = Logic.getWinner()
                     winningPlayer=winner[0];
                     winningScore=winner[1];
+                }
+
+                function getNumPlayers(){
+                   return Logic.getNumPlayers()
                 }
 
                 $scope.getScore = function(playerNumber){
@@ -205,21 +211,17 @@ angular.module('myApp')
                 };
 
 
-
-                function boo(checkbox){
-                        if(checkbox.checked){
-                                return 2;
-                        }else{
-                                return 1;
-                        }
-                }
+                $scope.numPlayers = 2
 
                 $scope.start = function(){
-                        var player1Name = document.getElementById("p1Name").value;
-                        var player2Name = document.getElementById("p2Name").value;
-                        var checkbox = document.getElementById("numPlayers");
-                        var numberOfPlayers = boo(checkbox);
-                        newGame(numberOfPlayers, player1Name, player2Name);
+                        var playersDict=[]
+                        for (var i=1;i<parseInt($scope.numPlayers)+1;i++){
+                            var pname =   document.getElementById("p"+i+"Name").value
+                            var isRobot =   document.getElementById("p"+i+"Robot").checked?false:true
+                                playersDict.push([pname,isRobot])
+
+                        }
+                        newGame(playersDict);
                         stored = null;
                 };
 
@@ -230,6 +232,9 @@ angular.module('myApp')
                                return "background-color:transparent"
                         }
                 }
+                  $scope.isPlaying = function (playerid){
+                         return playerid<getNumPlayers()
+                  }
                $scope.postScore = function () {
 		       if (winningScore>0)	{
 			  console.log(winningPlayer +":" + winningScore);

@@ -5,11 +5,6 @@
     angular.module('myApp', []).factory('Logic',
         function () {
 
-            var gameMode = Object.freeze({
-                P2P: "P2P",
-                P2C: "P2C"
-            });
-
             var Direction = Object.freeze({
                 UP: 0,
                 DOWN: 1,
@@ -18,28 +13,20 @@
             });
 
             var Status = Object.freeze({
-                EATEN_P1: "captured_one",
-                EATEN_P2: "captured_two",
+                EATEN: "captured",
                 FREE: "free",
-                OCCUPIED_P1: "occupied_one",
-                OCCUPIED_P2: "occupied_two",
+                OCCUPIED: "occupied",
                 VOID: "void"
             });
 
-            var PlayerId = Object.freeze({
-                ONE: 0,
-                TWO: 1
-            });
 
-            var playerTurn = PlayerId.ONE;
-            var myGameMode = gameMode.P2P;
-            var numPieces = 7;
-            var boardSize = 15;
-            var Player = function (playerId, pieces, playerName) {
+            //initialize game of 2 human plays
+
+            var Player = function (playerId, pieces, playerName, isRobot) {
                 var that = this
                 this._playerId = playerId;
                 this._playerName = playerName;
-
+                this._isRobot = isRobot;
                 this._unused = [];
                 this._inPlay = [];
                 this._dead = [];
@@ -70,10 +57,10 @@
                         var nextPiece = this._unused.splice(0, 1)[0];
                         nextPiece.programPiece(program);
                         nextPiece.placeOnNode(node);
-                    //      nextPiece._location = node;
-                   //     node.place(nextPiece);
+                        //      nextPiece._location = node;
+                        //     node.place(nextPiece);
                         node._occupy(nextPiece);
-                     //   node.desireOccupancy = [];
+                        //   node.desireOccupancy = [];
                         this._inPlay.push(nextPiece);
                         nextPiece.advance() //claim node for next round
                         return true;
@@ -95,8 +82,7 @@
                 };
 
                 this.toString = function () {
-                    clearDead();
-                    return null;
+                     return null;
                 };
 
                 this.clearDead = function () {
@@ -139,15 +125,17 @@
                     return score;
                 }
 
-                this.makeRandomMove=function(){
-                    var freenodes =[]
+                this.makeRandomMove = function (playerid) {
+                    var freenodes = []
+                    var board = thisGame.getBoard()
+                    var boardSize = board.length
                     for (var i = 0; i < boardSize; i++)
                         for (var j = 0; j < boardSize; j++) {
                             if (board[i][j].isFree())
-                               freenodes.push(board[i][j]);
+                                freenodes.push(board[i][j]);
                         }
                     var randint = Math.floor(Math.random() * freenodes.length)
-                    makeMove(freenodes[randint].row,freenodes[randint].col,PlayerId.TWO,["UP","DOWN","LEFT","RIGHT"])
+                    makeMove(freenodes[randint].row, freenodes[randint].col, playerid, ["UP", "DOWN", "LEFT", "RIGHT"])
                 }
 
             };
@@ -193,7 +181,7 @@
 
                 this.placeOnNode = function (node) {
                     this._location = node;
-                  //  this._nodesEaten++;
+                    //  this._nodesEaten++;
                 }
 
                 this.getPlayerId = function () {
@@ -244,6 +232,7 @@
                 // @JsonIgnore
                 this.right = null;
 
+                this.ownedby = null //who occupied or ate this node
                 this.occupant = null;
                 this.desireOccupancy = [];
 
@@ -252,7 +241,8 @@
                 }
 
                 this.canMove = function (direction) {
-
+                var board = thisGame.getBoard()
+                var boardSize = board.length;
                     switch (direction) {
                         case Direction.UP:
                             if (this.up == false || this.row == 0) {
@@ -285,6 +275,7 @@
 
                 this.move = function (direction) {
                     var node;
+                    var board = thisGame.getBoard()
                     switch (direction) {
                         case Direction.UP:
                             node = board[this.row - 1][this.col]
@@ -315,11 +306,8 @@
                 this.moveTime = function () {
                     //First check if the node is currently occupied. If so then move the occupant along
                     if (this.occupant != null) {
-                        if (this.occupant.getPlayerId() == (PlayerId.ONE)) {
-                            this.status = Status.EATEN_P1;
-                        } else {
-                            this.status = Status.EATEN_P2;
-                        }
+                 //      this.ownedby = this.occupant.getPlayerId();
+                        this.status = Status.EATEN;
                     }
 
                     var occuopantSelected = false;
@@ -388,16 +376,13 @@
 
                 this._occupy = function (piece) {
                     this.occupant = piece;
-                    if (piece.getPlayerId() == PlayerId.ONE) {
-                        this.status = Status.OCCUPIED_P1;
-                    } else {
-                        this.status = Status.OCCUPIED_P2;
-                    }
+                    this.ownedby = piece.getPlayerId();
+                    this.status = Status.OCCUPIED;
                     piece._nodesEaten++;
                 };
 
                 this.getStatus = function () {
-                    return this.status;
+                    return that.status;
                 }
             };
 
@@ -414,158 +399,115 @@
                 return this.id + "," + this.row + "," + this.col + "," + this.status + "," + this.up + "," + this.down + "," + this.left + "," + this.right;
             };
 
-            this._game = null;
-
-            var board=[];
-
-            function resetboard() {
-
-            // var objectx  = Object.create(Node);
-            var objectx = new Node();
-            objectx.status = Status.FREE
-            objectx.left = false
-            objectx.right = true
-            objectx.up = true,
-                objectx.down = true
-
-            //var objectx2  = Object.create(Node);
-            var objectx2 = new Node();
-            objectx2.status = Status.VOID;
-            objectx2.left = false
-            objectx2.right = false
-            objectx2.up = false,
-                objectx2.down = true
-
-            // var objectx3  = Object.create(Node);
-            var objectx3 = new Node();
-            objectx3.status = Status.FREE;
-            objectx3.left = false
-            objectx3.right = false
-            objectx3.up = false,
-                objectx3.down = true
-
-            //var objectx4  = Object.create(Node);
-            var objectx4 = new Node();
-            objectx4.status = Status.FREE;
-            objectx4.left = false
-            objectx4.right = false
-            objectx4.up = false,
-                objectx4.down = true
 
 
-            board = [];
-            for (var i = 0; i < boardSize; i++) {
-                var row = [];
-                for (var j = 0; j < boardSize; j++) {
-                    var obj;
-                    var randint = Math.floor(Math.random() * 5)
-                    switch (randint) {
-                        case 0:
-                            obj = objectx;
-                            break;
-                        case 1:
-                            obj = objectx2;
-                            break;
-                        case 2:
-                            obj = objectx3;
-                            break;
-                        case 3:
-                            obj = objectx4;
-                            break;
-                        default:
-                            obj = objectx;
-                    }
-                    obj.row = i;
-                    obj.col = j;
-                    row.push(angular.copy(obj))
-                }
-                board.push(row);
+            function advanceTime() {
+                thisGame.advanceTime();
             }
-            for (var i = 0; i < boardSize; i++)
-                for (var j = 0; j < boardSize; j++) {
-                    if (i == 0)
-                        board[i][j].up = false;
-                    if (j === 0)
-                        board[i][j].left = false;
-                    if (j === boardSize - 1)
-                        board[i][j].down = false;
-
-                    if (i === boardSize - 1)
-                        board[i][j].right = false;
-
-
-                    if (board[i][j].up == true && i > 0)
-                        board[i - 1][j].down = true;
-
-                    if (board[i][j].down == true && i < boardSize - 1)
-                        board[i + 1][j].up = true;
-
-                    if (board[i][j].left == true && j > 0)
-                        board[i][j - 1].right = true;
-
-                    if (board[i][j].right == true && j < boardSize - 1)
-                        board[i][j + 1].left = true;
-
-
-                }
-        }
-
-            var player1;
-            var player2;
-            var timeStep;
-
-            //We have to decide who lives in each round if two people choose the same space.
-            //That is decided by this advantage number.
-            //private PlayerId advantage = PlayerId.ONE;
-            var p1_nextMove;
-            var p2_nextMove;
 
             /****************************************************************************************
-             * Commands from the players
-             /**/
+             * Functions at application startup
+             ****************************************************************************************/
 
-            var players;
+            function isValidMove(row, column, player) {
+                var node = thisGame.getBoard()[row][column];
+                return node.status === Status.FREE;
+            }
 
-            newGame(2,"Qbert","Coily")
+            function makeMove(row, col, player, program) {
+                thisGame.makeMove(row, col, player, program)
+            }
 
 
 
+            function getBoard() {
+                return thisGame.getBoard()
+            }
 
-            function advantage() {
-                var player = Math.random();
-                if (player > (0.5)) {
-                    return PlayerId.ONE;
-                } else {
-                    return PlayerId.TWO;
+
+            function currentPlayer() {
+                return thisGame.playerTurn;
+            }
+
+            function completeTurn() {
+                if (thisGame.playerTurn == thisGame.players.length - 1) {
+                    advanceTime();
                 }
+                thisGame.playerTurn = thisGame.playerTurn === thisGame.players.length - 1 ? 0 : thisGame.playerTurn+1;
+                if (thisGame.players[thisGame.playerTurn]._isRobot) {
+                    thisGame.players[thisGame.playerTurn].makeRandomMove(thisGame.playerTurn)
+                    completeTurn()
+                 }
+
+
             }
 
-                function advanceTime() {
-                    for (var i=0;i<boardSize;i++){
-                        for (var j=0;j<boardSize;j++){
-                            board[i][j].moveTime();}
-                        }
-
-                player1.advanceTime();
-                player2.advanceTime();
-                timeStep++;
+            function noMorePieces() {
+                return thisGame.players.reduce(function (totalunused, player) {
+                        totalunused + player.unusedCount()}) == 0
             }
 
-            function move(row, col,player) {
-                if (player.getNextMove() != null) {
-                   // var nextMove = player.getNextMove();
-                    var move = player.getNextMove();
-                    //If pass then do nothing
-                    if (move[0].toLowerCase().trim() === ("pass")) {
-                        player.setNextMove(null);
-                        return;
+
+            function getScore(playerID) {
+                return thisGame.players[playerID].getScore();
+            }
+
+            function getRemainingMoves(playerID) {
+                return thisGame.players[playerID].unusedCount();
+            }
+
+            function isGameOver() {
+                var isOver = false;
+                thisGame.players.map(function (player) {
+                    var deadcount =player.deadCount()
+                    if (deadcount == thisGame.numPieces) {
+                        isOver=true
                     }
 
-                    //Otherwise make all the moves
-                   // var moves = nextMove.split("\\|");
-              //      nextMove.map(function (singleMove) {
-                      //  var move = singleMove.split(",");
-                    //    var nodeId = move[0];
+                })
+                return isOver;
+            }
+
+            function getWinner() {
+                return thisGame.getWinnr()
+            }
+
+            function getNumPlayers(){
+                return thisGame.players.length
+            }
+            var Game=function(playersDict) {
+                var that = this
+                this.players = [];
+                var board = [];
+                this.playerTurn = 0;
+                this.numPieces = 7;
+                var boardSize = 15;
+                for (var player in Object.keys(playersDict)) {
+                    var p = new Player(this.players.length, this.numPieces,playersDict[player][0] ,playersDict[player][1] );
+                    this.players.push(p);
+                }
+
+                resetboard()
+                this.makeMove = function (row, col, player, program) {
+                    that.players[player].setNextMove(program)
+                    that.move(row, col, player);
+                }
+
+                function getmyboard(){
+                    return board;
+                }
+                this.getBoard = function(){
+                    return getmyboard()
+                }
+                this.move=function(row, col, player) {
+                    if (that.players[player].getNextMove() != null) {
+                        // var nextMove = player.getNextMove();
+                        var move = that.players[player].getNextMove();
+                        //If pass then do nothing
+                        if (move[0].toLowerCase().trim() === ("pass")) {
+                            player.setNextMove(null);
+                            return;
+                        }
 
                         var program = [];
 
@@ -580,142 +522,133 @@
                                 program.push(Direction.LEFT);
                             } else if (value === "right") {
                                 program.push(Direction.RIGHT);
-                            }}
+                            }
+                        }
 
                         var node = board[row][col];
 
-                        player.place(node, program);
+                        thisGame.players[player].place(node, program);
 
+                    }
                 }
 
-                if (player == player1) {
-                    player1.setNextMove(null);
-                } else if (player == player2) {
-                    player2.setNextMove(null);
+                this.advanceTime = function () {
+                    for (var i = 0; i < boardSize; i++) {
+                        for (var j = 0; j < boardSize; j++) {
+                            board[i][j].moveTime();
+                        }
+                    }
+                    this.players.map(function (player) {
+                        player.advanceTime()
+                    });
+                }
+                function resetboard() {
+                    var objectx = new Node();
+                    objectx.status = Status.FREE
+                    objectx.left = false
+                    objectx.right = true
+                    objectx.up = true,
+                        objectx.down = true
+
+                    //var objectx2  = Object.create(Node);
+                    var objectx2 = new Node();
+                    objectx2.status = Status.VOID;
+                    objectx2.left = false
+                    objectx2.right = false
+                    objectx2.up = false,
+                        objectx2.down = true
+
+                    // var objectx3  = Object.create(Node);
+                    var objectx3 = new Node();
+                    objectx3.status = Status.FREE;
+                    objectx3.left = false
+                    objectx3.right = false
+                    objectx3.up = false,
+                        objectx3.down = true
+
+                    //var objectx4  = Object.create(Node);
+                    var objectx4 = new Node();
+                    objectx4.status = Status.FREE;
+                    objectx4.left = false
+                    objectx4.right = false
+                    objectx4.up = false,
+                        objectx4.down = true
+
+                    board = [];
+                    for (var i = 0; i < boardSize; i++) {
+                        var row = [];
+                        for (var j = 0; j < boardSize; j++) {
+                            var obj;
+                            var randint = Math.floor(Math.random() * 5)
+                            switch (randint) {
+                                case 0:
+                                    obj = objectx;
+                                    break;
+                                case 1:
+                                    obj = objectx2;
+                                    break;
+                                case 2:
+                                    obj = objectx3;
+                                    break;
+                                case 3:
+                                    obj = objectx4;
+                                    break;
+                                default:
+                                    obj = objectx;
+                            }
+                            obj.row = i;
+                            obj.col = j;
+                            row.push(angular.copy(obj))
+                        }
+                        board.push(row);
+                    }
+                    for (var i = 0; i < boardSize; i++)
+                        for (var j = 0; j < boardSize; j++) {
+                            if (i == 0)
+                                board[i][j].up = false;
+                            if (j === 0)
+                                board[i][j].left = false;
+                            if (j === boardSize - 1)
+                                board[i][j].down = false;
+
+                            if (i === boardSize - 1)
+                                board[i][j].right = false;
+
+
+                            if (board[i][j].up == true && i > 0)
+                                board[i - 1][j].down = true;
+
+                            if (board[i][j].down == true && i < boardSize - 1)
+                                board[i + 1][j].up = true;
+
+                            if (board[i][j].left == true && j > 0)
+                                board[i][j - 1].right = true;
+
+                            if (board[i][j].right == true && j < boardSize - 1)
+                                board[i][j + 1].left = true;
+
+
+                        }
+                }
+
+                this.getWinner = function () {
+                    var max = 0
+                    var playerid = 0;
+                    players.map(function (player) {
+                        if (max > player.getScore()) {
+                            max = player.getScore()
+                            playerid = playerid
+                        }
+                    })
+                    return [players[playerid].getPlayerName(), max]
                 }
 
             }
 
-            /****************************************************************************************
-             * Functions at application startup
-             ****************************************************************************************/
-            this.readyForMove = function (playerId) {
-                if (playerId === 1) {
-                    return p1_nextMove === null;
-                } else {
-                    return p2_nextMove === null;
-                }
+            function newGame(playersDict){
+                thisGame = new Game(playersDict);
             }
-
-
-            function isValidMove(row, column, player) {
-                var node = board[row][column];
-                return node.status===Status.FREE;// && player === playerTurn;
-            }
-
-            function makeMove (row, col, player,program) {
-
-//                console.log("ADVANTAGE: " + a);
-                var a = player;
-                if(player == PlayerId.ONE){
-                    p1_nextMove = program;
-                    player1.setNextMove(p1_nextMove);
-                }else {
-                    p2_nextMove = program;
-                    player2.setNextMove(p2_nextMove);
-                }
-                    movePieces(row,col,a);
-                }
-
-
-               function movePieces(row,col,a){
-
-                if (a === (PlayerId.ONE)) {
-                    move(row, col, player1);
-                }   else {
-                    move(row, col,player2);
-                }
-
-            }
-
-            function setGameMode (numPlayers) {
-                if (numPlayers==2)
-                    myGameMode =gameMode.P2P
-                else
-                    myGameMode =gameMode.P2C
-
-            }
-
-            function getBoard() {
-              return board
-            }
-
-            function createPlayer(playerId, playerName) {
-                if (playerId == 1) {
-                    player1 = new Player(PlayerId.ONE, numPieces, playerName);
-
-                } else {
-                    player2 = new Player(PlayerId.TWO, numPieces, playerName);
-                }
-            }
-            function currentPlayer(){
-                return playerTurn;
-            }
-
-            function completeTurn() {
-                if (playerTurn == PlayerId.TWO) {
-                    advanceTime();
-                    p1_nextMove = null;
-                    p2_nextMove = null;
-                }
-                playerTurn = playerTurn===PlayerId.ONE?PlayerId.TWO:PlayerId.ONE;
-
-                if (myGameMode===gameMode.P2C &&  playerTurn===PlayerId.TWO) {
-                    player2.makeRandomMove()
-                    completeTurn()
-                }
-
-                }
-
-            function noMorePieces(){
-                return player1.unusedCount()==0 && player2.unusedCount()==0
-
-            }
-
-
-            function newGame(numberOfPlayers, player1Name, player2Name){
-             setGameMode(numberOfPlayers);
-             player1 = new Player(PlayerId.ONE, numPieces,player1Name);
-             player2 = new Player(PlayerId.TWO, numPieces, player2Name);
-             players = [player1,player2];
-             resetboard()
-              playerTurn = PlayerId.ONE;
-
-            }
-
-            function getScore(playerID){
-              return players[playerID].getScore();
-            }
-
-            function getRemainingMoves(playerID){
-              return players[playerID].unusedCount();
-            }
-
-            function isGameOver(){
-                return player1.deadCount()==numPieces && player2.deadCount()==numPieces
-            }
-
-            function  getWinner(){
-                if (player1.getScore()>player2.getScore())
-                    return [player1.getPlayerName(),player1.getScore()]
-                else
-                    return  [player2.getPlayerName(),player2.getScore()]
-
-
-
-
-            }
-
+            var thisGame =  new Game(["Qbert",false], ["Coily",false], ["pinky",true])
             return {
                 isValidMove: isValidMove,
                 getBoard: getBoard,
@@ -728,7 +661,8 @@
                 getScore:getScore,
                 getRemainingMoves:getRemainingMoves,
                 isGameOver: isGameOver,
-                getWinner:getWinner
+                getWinner:getWinner,
+                getNumPlayers:getNumPlayers
             };
 
 

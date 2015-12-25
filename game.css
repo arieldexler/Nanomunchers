@@ -39,12 +39,28 @@
     background-color: darkorange;
 }
 
+.takenPlayerThree{
+    background-color: darkred;
+}
+
+.takenPlayerFour{
+    background-color: darkmagenta;
+}
+
 .occupiedOne{
     background-color: gold;
 }
 
 .occupiedTwo{
     background: darkorange;
+}
+
+.occupiedThree{
+    background-color: darkred;
+}
+
+.occupiedFour{
+    background: darkmagenta;
 }
 
 
