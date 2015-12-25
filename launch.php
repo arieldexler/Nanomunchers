@@ -26,8 +26,26 @@
 
 <body ng-cloak ng-controller="Ctrl">
 
+<div class="post" style="position:absolute; left:0; top:0%; height:30%;width:100%">
 
-<div ng-repeat = "row in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]" style="position:absolute; top:{{row * 6.66}}%; left:0; width:75%; height:6.66%;">
+
+
+    <h1 class="title">Nanomunchers</h1>
+    <div style="background-color: #332518">
+    <div style="color:white; position:relative;"><br>
+        <div class="instr">
+            <b>Rules of the game:</b>
+            <ul>
+                <li><span>#1: </span>Click on a free spot. #2: </span>Type the program: (U)p,(D)own,(L)eft,(R)ight and click Complete Turn when done .</li>
+            </ul>
+        </div>
+        <div>
+            <b>The objective of the game is have your nanomunchers eat as many nodes as possible before they run out of nodes and die.</b></div>
+    </div>
+    </div>
+</div>
+
+<div ng-repeat = "row in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]" style="position:absolute; top:{{(row * 6.66) + 30}}%; left:0; width:75%; height:6.66%;">
     <div ng-repeat = "column in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]" style="position:absolute; top:0; left:{{column * 6.66}}%; width:6.66%; height:100%" >
         <div id="row,column"
              ng-click = "store(row,column)"
@@ -51,15 +69,15 @@
 
 
 
-<input ng-show="showDirectionInput()" ng-keypress="test($event)" style ="position:absolute; left:{{getLeft()}}%; top:{{getTop()}}%; width: 6.66%; height: 6.66%;;"  type="text" class="form-control" placeholder="UDLR" autofocus>
+<input ng-show="showDirectionInput()" ng-keypress="test($event)" style ="position:absolute; left:{{getLeft()}}%; top:{{getTop() + 30}}%; width: 6.66%; height: 6.66%;;"  type="text" class="form-control" placeholder="UDLR" autofocus>
 <input class="">
-<div style="position: absolute; right: 0px;top: 0px; width:25%; height: 100%; border: solid;">
+<div style="position: absolute; right: 0px;top: 30%; width:25%; height: 100%; border: solid;">
     <div ng-if="isGameOver()">"postScore({{getWinningPlayer()}}, {{getWinningScore()}})" </div>
     <button type="button"  ng-click="completeTurn()" class="btn btn-success btn-lg">Complete Turn</button>
     <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
         New Game
     </button>
-    <table class="table">
+    <table class="table" style="color:white">
         <thead>
         <tr>
             <th>Player</th>
@@ -68,28 +86,41 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-class="isTurn(0)">
+        <tr style="{{isTurn(0)}}">
             <td><img src="player0.png"></td>
             <td>{{getScore(0)}}</td>
             <td>{{getRemainingMoves(0)}}</td>
         </tr>
-        <tr ng-class="isTurn(1)">
+        <tr style="{{isTurn(1)}}">
             <td><img src="player1.png"> </td>
             <td>{{getScore(1)}}</td>
             <td>{{getRemainingMoves(1)}}</td>
         </tr>
-        <tr ng-if="isPlaying(2)" ng-class="isTurn(2)">
+        <tr ng-if="isPlaying(2)" style="{{isTurn(2)}}">
             <td><img src="player2.png"> </td>
             <td>{{getScore(2)}}</td>
             <td>{{getRemainingMoves(2)}}</td>
         </tr>
-        <tr ng-if="isPlaying(3)" ng-class="isTurn(3)">
+        <tr ng-if="isPlaying(3)" style="{{isTurn(3)}}">
             <td><img src="player3.png"> </td>
             <td>{{getScore(3)}}</td>
             <td>{{getRemainingMoves(3)}}</td>
         </tr>
         </tbody>
     </table>
+      <div class="post">
+        <h2 class="title">Last 10 scores</h2>
+        <div style="color: white;">
+
+        <?php
+          // functions.php in case of an opening in the same window
+          // ../../functions.php in case of an opening in a new window
+          include '../../lastScores.php';
+          getScores("NanomunchersV2");
+        ?>
+        </div>
+    </div>
+    <button id="score2" ng-click="postScore()" type="button" class="btn btn-success btn-lg">Save Score</button>
 </div>
 </div>
 
