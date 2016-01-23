@@ -1,6 +1,4 @@
-/**
- * Created by islam on 12/6/15.
- */
+
 'use strict';
 angular.module('myApp')
       .controller('Ctrl', ['$scope','Logic','$interval',
@@ -10,6 +8,15 @@ angular.module('myApp')
                 var winningPlayer;
                 var stored;
                 var intervalpromise
+                                
+                angular.element(document).ready(function () { 
+                $('#icon0').draggable({helper:"clone"});
+                $('.hello').draggable({helper:"clone"});  
+                $('.square').droppable({         
+               drop: function( event, ui )
+                {console.log("DROPPED!")}});
+                 })
+               $('#1,1').mouseenter(function(){alert('hello!');});
                 $scope.isVoid = function(row,column){
                         return board[row][column].status === "void";
                 };
@@ -34,15 +41,7 @@ angular.module('myApp')
                         return board[row][column].down === true;
                 };
 
-              /*  $scope.isTakenPlayerOne=function(row,column){
-                        return board[row][column].status === "captured_one" ||
-                            board[row][column].status === "occupied_one";
-                };
-
-                $scope.isTakenPlayerTwo=function(row,column){
-                        return board[row][column].status === "captured_two" ||
-                            board[row][column].status === "occupied_two";
-                };*/
+             
                 $scope.isTakenbyPlayer=function(row,column,playerid){
                         return board[row][column].ownedby==playerid
                 }

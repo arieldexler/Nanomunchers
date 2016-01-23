@@ -18,7 +18,7 @@
     <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
     <link rel="stylesheet" type="text/css" href="game.css">
-
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
     <script src="Logic.js"></script>
     <script src="game.js"></script>
 
@@ -45,7 +45,7 @@
     </div>
 </div>
 
-<div ng-repeat = "row in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]" style="position:absolute; top:{{(row * 6.66) + 30}}%; left:0; width:75%; height:6.66%;">
+<div id='space' ng-repeat = "row in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]" style="position:absolute; top:{{(row * 6.66) + 30}}%; left:0; width:75%; height:6.66%;">
     <div ng-repeat = "column in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]" style="position:absolute; top:0; left:{{column * 6.66}}%; width:6.66%; height:100%" >
         <div id="row,column"
              ng-click = "store(row,column)"
@@ -87,7 +87,7 @@
         </thead>
         <tbody>
         <tr style="{{isTurn(0)}}">
-            <td><img src="player0.png"></td>
+            <td><img id='icon0' src="player0.png"></td>
             <td>{{getScore(0)}}</td>
             <td>{{getRemainingMoves(0)}}</td>
         </tr>

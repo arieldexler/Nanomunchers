@@ -15,6 +15,8 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
     <link rel="stylesheet" type="text/css" href="game.css">
 
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>
 
     <script src="Logic.js"></script>
     <script src="game.js"></script>
@@ -67,8 +69,8 @@
         </tr>
         </thead>
         <tbody>
-        <tr ng-class="isTurn(0)">
-            <td><img src="player0.png"></td>
+        <tr  ng-class="isTurn(0)">
+            <td><img id="icon0" src="player0.png"></td>
             <td>{{getScore(0)}}</td>
             <td>{{getRemainingMoves(0)}}</td>
         </tr>
