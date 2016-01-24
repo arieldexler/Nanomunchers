@@ -60,8 +60,15 @@
 }
 
 .occupiedFour{
-    background: darkmagenta;
+    background-color: darkmagenta;
 }
 
 
 
+.turnyes{
+ background-color: lightgray;
+}
+
+.turnno{
+     background-color: transparent;
+}

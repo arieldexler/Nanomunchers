@@ -644,7 +644,11 @@
                 }
 
             }
-
+             
+            function getplayername(playerid){
+                            return thisGame.players[playerid].getPlayerName()
+            }
+                      
             function newGame(playersDict){
                 thisGame = new Game(playersDict);
             }
@@ -662,7 +666,8 @@
                 getRemainingMoves:getRemainingMoves,
                 isGameOver: isGameOver,
                 getWinner:getWinner,
-                getNumPlayers:getNumPlayers
+                getNumPlayers:getNumPlayers,
+                getplayername:getplayername
             };
 
 

@@ -10,13 +10,23 @@ angular.module('myApp')
                 var intervalpromise
                                 
                 angular.element(document).ready(function () { 
-                $('#icon0').draggable({helper:"clone"});
-                $('.hello').draggable({helper:"clone"});  
+                setdraggable(0);               
+               
                 $('.square').droppable({         
-               drop: function( event, ui )
-                {console.log("DROPPED!")}});
-                 })
-               $('#1,1').mouseenter(function(){alert('hello!');});
+                   drop: function( event, ui ){
+                    var that = this;                 
+                   $scope.$apply(function(){
+              //  {console.log("DROPPED!")}});
+                  console.log($(that).attr("id"))
+                   var coords=$(that).attr("id").split(',')
+                   $scope.store.apply(that,coords)
+                   })}
+                 })})
+                
+            //   $('#1,1').mouseenter(function(){alert('hello!')
+              // });
+
+
                 $scope.isVoid = function(row,column){
                         return board[row][column].status === "void";
                 };
@@ -41,6 +51,13 @@ angular.module('myApp')
                         return board[row][column].down === true;
                 };
 
+
+
+
+
+
+
+
              
                 $scope.isTakenbyPlayer=function(row,column,playerid){
                         return board[row][column].ownedby==playerid
@@ -57,7 +74,12 @@ angular.module('myApp')
                               return name;
                         }
                 };
-
+                 function setdraggable(id){
+                                for (var i=0;i<getNumPlayers();i++){
+                     $('#icon'+i).draggable({disabled: true});                                  
+                }
+                  $('#icon'+id).draggable({disabled: false,helper:"clone"}); 
+                      }
                 function update (row,column,directions){
                         stored = null;
                         var player = Logic.currentPlayer();
@@ -85,6 +107,7 @@ angular.module('myApp')
                         if (Logic.noMorePieces()){
                                  intervalpromise = $interval(playtoend,1000);
                         }
+                        setdraggable(Logic.currentPlayer())
                 };
                   function playtoend(){
                         if (Logic.isGameOver()){
@@ -210,8 +233,11 @@ angular.module('myApp')
                 };
 
 
-                $scope.numPlayers = 2
-
+                $scope.numPlayers = 3
+                $scope.getname=function(id){
+                  return Logic.getplayername(id)
+                                
+                }                
                 $scope.start = function(){
                         var playersDict=[]
                         for (var i=1;i<parseInt($scope.numPlayers)+1;i++){
@@ -226,9 +252,11 @@ angular.module('myApp')
 
                   $scope.isTurn = function(player){
                         if(player === Logic.currentPlayer()){
-                                return "background-color:#337ab7";
+                                //return "background-color:#337ab7";
+                                  return "turnyes"
                         }else{
-                               return "background-color:transparent"
+                              // return "background-color:transparent"
+                               return "turnno"
                         }
                 }
                   $scope.isPlaying = function (playerid){
