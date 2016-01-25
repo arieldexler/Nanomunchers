@@ -243,7 +243,7 @@ angular.module('myApp')
                         for (var i=1;i<parseInt($scope.numPlayers)+1;i++){
                             var pname =   document.getElementById("p"+i+"Name").value
                             var isRobot =   document.getElementById("p"+i+"Robot").checked?false:true
-                                playersDict.push([pname,isRobot])
+                             playersDict[pname]=isRobot
 
                         }
                         newGame(playersDict);

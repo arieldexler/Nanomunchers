@@ -482,8 +482,8 @@
                 this.playerTurn = 0;
                 this.numPieces = 7;
                 var boardSize = 15;
-                for (var player in Object.keys(playersDict)) {
-                    var p = new Player(this.players.length, this.numPieces,playersDict[player][0] ,playersDict[player][1] );
+                for (var player in playersDict) {
+                    var p = new Player(this.players.length, this.numPieces,player ,playersDict[player] );
                     this.players.push(p);
                 }
 
@@ -652,7 +652,7 @@
             function newGame(playersDict){
                 thisGame = new Game(playersDict);
             }
-            var thisGame =  new Game(["Qbert",false], ["Coily",false], ["pinky",true])
+             var thisGame =  new Game({"Qbert":false, "Coily":false, "pinky":true})
             return {
                 isValidMove: isValidMove,
                 getBoard: getBoard,
